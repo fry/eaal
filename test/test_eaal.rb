@@ -5,7 +5,7 @@ class TestEaal < Test::Unit::TestCase
   # prepare the api object. sets EAAL to use FileCache to load fixtures 
   def setup
     EAAL.cache = EAAL::Cache::FileCache.new(File.dirname(__FILE__) + '/fixtures/')
-    @api = EAAL::API.new('test','test')
+    @api = EAAL::API.new(1234, 'test')
   end
 
   # test if we really got an API Object

@@ -1,22 +1,22 @@
 
 # EAAL::API class
 # Usage Example:
-#  api = EAAL::API.new("my userid", "my API key")
+#  api = EAAL::API.new("key id", "64bit base64 verification code")
 #  result = api.Characters
 #  result.characters.each{|character|
 #      puts character.name
 #  }
 class EAAL::API
-  attr_accessor :userid, :key, :scope
+  attr_accessor :keyid, :vcode, :scope
       
   # constructor
   # Expects:
-  # * userid (String | Integer) the users id
-  # * key (String) the apikey Full or Restricted
+  # * keyid (String | Integer) the id of the API key to use
+  # * vcode (String) the verification code of the key
   # * scope (String) defaults to account
-  def initialize(userid, key, scope="account")
-    self.userid = userid.to_s
-    self.key = key.to_s
+  def initialize(keyid, vcode, scope="account")
+    self.keyid = keyid.to_s
+    self.vcode = vcode.to_s
     self.scope = scope.to_s
   end
   
@@ -39,12 +39,12 @@ class EAAL::API
   # * opts (Hash)
   def request_xml(scope, name, opts)
     opts = EAAL.additional_request_parameters.merge(opts)
-    xml = EAAL.cache.load(self.userid, self.key, scope, name,opts)
+    xml = EAAL.cache.load(self.keyid, scope, name,opts)
     if not xml
       source = URI.parse(EAAL.api_base + scope + '/' + name +'.xml.aspx')
       req_path = source.path + format_url_request(opts.merge({
-        :userid => self.userid, 
-        :apikey => self.key}))
+        :keyID => self.keyid, 
+        :vCode => self.vcode}))
       req = Net::HTTP::Get.new(req_path)
       req[EAAL.version_string]
       res = Net::HTTP.new(source.host, source.port).start {|http| http.request(req) } #one request for now  
@@ -55,7 +55,7 @@ class EAAL::API
       else 
         raise EAAL::Exception::HTTPError.new("An HTTP Error occured, body: " + res.body)
       end
-      EAAL.cache.save(self.userid, self.key, scope,name,opts, res.body)
+      EAAL.cache.save(self.keyid, scope,name,opts, res.body)
       xml = res.body
     end
     doc = Hpricot.XML(xml)

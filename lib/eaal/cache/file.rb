@@ -18,18 +18,18 @@ class EAAL::Cache::FileCache
   end
   
   # create the path/filename for the cache file
-  def filename(userid, apikey, scope, name, args)
+  def filename(keyid, scope, name, args)
     ret =""
     args.delete_if { |k,v| (v || "").to_s.length == 0 }
     h = args.stringify_keys
     ret += h.sort.flatten.collect{ |e| e.to_s }.join(':')
     hash = ret.gsub(/:$/,'')
-    "#{@basepath}#{userid}/#{apikey}/#{scope}/#{name}/Request_#{hash}.xml"
+    "#{@basepath}#{keyid}/#{scope}/#{name}/Request_#{hash}.xml"
   end
   
   # load xml if available, return false if not available, or cachedUntil ran out
-  def load(userid, apikey, scope, name, args)
-    filename = self.filename(userid, apikey,scope,name,args)
+  def load(keyid, scope, name, args)
+    filename = self.filename(keyid,scope,name,args)
     if not File.exist?(filename)
       ret = false
     else
@@ -54,8 +54,8 @@ class EAAL::Cache::FileCache
   end
   
   # save xml data to file
-  def save(userid, apikey, scope, name, args, xml)
-    filename = self.filename(userid, apikey,scope,name,args)
+  def save(keyid, scope, name, args, xml)
+    filename = self.filename(keyid, scope,name,args)
     FileUtils.mkdir_p(File.dirname(filename))
     File.open(filename,'w') { |f| f.print xml }        
   end
